@@ -312,6 +312,15 @@ class NotionDB {
                 owner: '',
                 dueDate: '',
                 url: 'https://fountain-onboarding.vercel.app/'
+            },
+            {
+                id: '7',
+                name: 'Refund Calculator',
+                description: 'Patient refund calculator for processing accurate medication and service refunds',
+                status: 'In Progress',
+                owner: '',
+                dueDate: '',
+                url: 'https://refund-calculator-five.vercel.app/'
             }
         ];
     }
