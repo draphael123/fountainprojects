@@ -150,6 +150,22 @@ class NotionDB {
                 owner: '',
                 dueDate: '',
                 url: 'https://website-puce-rho-32.vercel.app/'
+            },
+            {
+                id: '4',
+                name: 'CS Escalation Service (DOES NOT WORK!)',
+                status: 'On Hold',
+                owner: '',
+                dueDate: '',
+                url: 'https://escalation-service.vercel.app/'
+            },
+            {
+                id: '5',
+                name: 'Time clock',
+                status: 'In Progress',
+                owner: '',
+                dueDate: '',
+                url: 'https://vercel.com/daniel-8982s-projects/time-clock-extension'
             }
         ];
     }
