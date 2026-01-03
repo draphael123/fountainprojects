@@ -1,17 +1,3 @@
 {
-  "version": 2,
-  "name": "fountain-vitality-projects",
-  "builds": [
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ]
+  "version": 2
 }
-
