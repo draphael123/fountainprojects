@@ -126,14 +126,32 @@ class NotionDB {
     }
 
     defaults() {
-        return [{
-            id: '1',
-            name: 'Docusign Template Generator',
-            status: 'In Progress',
-            owner: '',
-            dueDate: '',
-            url: 'https://docusign-git-main-daniel-8982s-projects.vercel.app?_vercel_share=aaQplppDthTyFoYeIQm75hkbCvNasDYo'
-        }];
+        return [
+            {
+                id: '1',
+                name: 'Docusign Template Generator',
+                status: 'In Progress',
+                owner: '',
+                dueDate: '',
+                url: 'https://docusign-git-main-daniel-8982s-projects.vercel.app?_vercel_share=aaQplppDthTyFoYeIQm75hkbCvNasDYo'
+            },
+            {
+                id: '2',
+                name: 'Macro bot',
+                status: 'In Progress',
+                owner: '',
+                dueDate: '',
+                url: 'https://fountain-macro-assistant.vercel.app/'
+            },
+            {
+                id: '3',
+                name: 'Availability Report',
+                status: 'In Progress',
+                owner: '',
+                dueDate: '',
+                url: 'https://website-puce-rho-32.vercel.app/'
+            }
+        ];
     }
 
     esc(str) {
