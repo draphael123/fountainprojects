@@ -1,220 +1,150 @@
-// Notion-style Project Database for Fountain Vitality
-
-class ProjectDatabase {
+class NotionDB {
     constructor() {
-        this.projects = this.loadProjects();
-        this.editingProjectId = null;
+        this.projects = this.load();
+        this.editing = null;
         this.init();
     }
 
     init() {
-        this.renderTable();
-        this.updateCount();
-        this.setupEventListeners();
+        this.render();
+        this.bind();
     }
 
-    setupEventListeners() {
-        // Add new project button
-        document.getElementById('addProjectBtn').addEventListener('click', () => {
-            this.openModal();
-        });
-
-        // Close modal
-        document.getElementById('closeModal').addEventListener('click', () => {
-            this.closeModal();
-        });
-
-        // Cancel button
-        document.getElementById('cancelBtn').addEventListener('click', () => {
-            this.closeModal();
-        });
-
-        // Form submission
-        document.getElementById('projectForm').addEventListener('submit', (e) => {
+    bind() {
+        document.getElementById('newBtn').onclick = () => this.openModal();
+        document.getElementById('closeBtn').onclick = () => this.closeModal();
+        document.getElementById('cancelBtn').onclick = () => this.closeModal();
+        document.getElementById('projectForm').onsubmit = (e) => {
             e.preventDefault();
-            this.saveProject();
-        });
-
-        // Close modal when clicking outside
-        document.getElementById('projectModal').addEventListener('click', (e) => {
-            if (e.target.id === 'projectModal') {
-                this.closeModal();
-            }
-        });
+            this.save();
+        };
+        document.querySelector('.modal-overlay').onclick = () => this.closeModal();
     }
 
-    openModal(projectId = null) {
-        const modal = document.getElementById('projectModal');
-        const modalTitle = document.getElementById('modalTitle');
+    openModal(id = null) {
+        const modal = document.getElementById('modal');
+        const title = document.getElementById('modalTitle');
         
-        if (projectId) {
-            // Edit mode
-            this.editingProjectId = projectId;
-            const project = this.projects.find(p => p.id === projectId);
-            
-            modalTitle.textContent = 'Edit Project';
-            document.getElementById('projectName').value = project.name;
-            document.getElementById('projectStatus').value = project.status;
-            document.getElementById('projectOwner').value = project.owner;
-            document.getElementById('projectDueDate').value = project.dueDate;
-            document.getElementById('projectUrl').value = project.url;
+        if (id) {
+            this.editing = id;
+            const p = this.projects.find(x => x.id === id);
+            title.textContent = 'Edit Project';
+            document.getElementById('name').value = p.name;
+            document.getElementById('status').value = p.status;
+            document.getElementById('owner').value = p.owner;
+            document.getElementById('dueDate').value = p.dueDate;
+            document.getElementById('url').value = p.url;
         } else {
-            // New project mode
-            this.editingProjectId = null;
-            modalTitle.textContent = 'New Project';
+            this.editing = null;
+            title.textContent = 'New Project';
             document.getElementById('projectForm').reset();
         }
         
-        modal.classList.remove('hidden');
+        modal.classList.add('active');
     }
 
     closeModal() {
-        document.getElementById('projectModal').classList.add('hidden');
-        document.getElementById('projectForm').reset();
-        this.editingProjectId = null;
+        document.getElementById('modal').classList.remove('active');
+        this.editing = null;
     }
 
-    saveProject() {
-        const projectData = {
-            id: this.editingProjectId || Date.now().toString(),
-            name: document.getElementById('projectName').value.trim(),
-            status: document.getElementById('projectStatus').value,
-            owner: document.getElementById('projectOwner').value.trim(),
-            dueDate: document.getElementById('projectDueDate').value,
-            url: document.getElementById('projectUrl').value.trim(),
-            createdAt: this.editingProjectId 
-                ? this.projects.find(p => p.id === this.editingProjectId)?.createdAt 
-                : new Date().toISOString()
+    save() {
+        const data = {
+            id: this.editing || Date.now().toString(),
+            name: document.getElementById('name').value,
+            status: document.getElementById('status').value,
+            owner: document.getElementById('owner').value,
+            dueDate: document.getElementById('dueDate').value,
+            url: document.getElementById('url').value
         };
 
-        if (this.editingProjectId) {
-            // Update existing project
-            const index = this.projects.findIndex(p => p.id === this.editingProjectId);
-            if (index !== -1) {
-                this.projects[index] = projectData;
-            }
+        if (this.editing) {
+            const i = this.projects.findIndex(x => x.id === this.editing);
+            this.projects[i] = data;
         } else {
-            // Add new project
-            this.projects.push(projectData);
+            this.projects.push(data);
         }
 
-        this.saveProjects();
-        this.renderTable();
-        this.updateCount();
+        this.persist();
+        this.render();
         this.closeModal();
     }
 
-    editProject(id) {
+    edit(id) {
         this.openModal(id);
     }
 
-    deleteProject(id) {
-        if (confirm('Are you sure you want to delete this project?')) {
-            this.projects = this.projects.filter(p => p.id !== id);
-            this.saveProjects();
-            this.renderTable();
-            this.updateCount();
+    delete(id) {
+        if (confirm('Delete this project?')) {
+            this.projects = this.projects.filter(x => x.id !== id);
+            this.persist();
+            this.render();
         }
     }
 
-    renderTable() {
-        const tbody = document.getElementById('projectsBody');
-        const emptyState = document.getElementById('emptyState');
-
+    render() {
+        const tbody = document.getElementById('tableBody');
+        
         if (this.projects.length === 0) {
-            tbody.innerHTML = '';
-            emptyState.classList.remove('hidden');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#37352f99;">No projects yet</td></tr>';
             return;
         }
 
-        emptyState.classList.add('hidden');
-        
-        tbody.innerHTML = this.projects.map(project => {
-            const dueDate = project.dueDate 
-                ? new Date(project.dueDate).toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    year: 'numeric' 
-                  })
-                : '';
-            
-            const statusClass = this.getStatusClass(project.status);
+        tbody.innerHTML = this.projects.map(p => {
+            const statusClass = p.status.toLowerCase().replace(/\s+/g, '-');
+            const date = p.dueDate ? new Date(p.dueDate).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+            }) : '';
             
             return `
-                <tr data-id="${project.id}">
+                <tr>
+                    <td><span class="project-name">${this.esc(p.name)}</span></td>
+                    <td><span class="status status-${statusClass}">${p.status}</span></td>
+                    <td>${this.esc(p.owner) || ''}</td>
+                    <td>${date}</td>
+                    <td class="project-url">${p.url ? `<a href="${this.esc(p.url)}" target="_blank">View →</a>` : ''}</td>
                     <td>
-                        <span class="project-name">${this.escapeHtml(project.name)}</span>
-                    </td>
-                    <td>
-                        <span class="status-badge ${statusClass}">${project.status}</span>
-                    </td>
-                    <td>
-                        <span class="project-owner">${this.escapeHtml(project.owner) || '—'}</span>
-                    </td>
-                    <td>
-                        <span class="project-date">${dueDate || '—'}</span>
-                    </td>
-                    <td class="project-url">
-                        ${project.url ? `<a href="${this.escapeHtml(project.url)}" target="_blank" rel="noopener">View →</a>` : '—'}
-                    </td>
-                    <td>
-                        <button class="action-btn edit-btn" onclick="projectDB.editProject('${project.id}')">Edit</button>
-                        <button class="action-btn delete-btn" onclick="projectDB.deleteProject('${project.id}')">Delete</button>
+                        <div class="action-btns">
+                            <button class="action-btn" onclick="db.edit('${p.id}')">Edit</button>
+                            <button class="action-btn delete-btn" onclick="db.delete('${p.id}')">Delete</button>
+                        </div>
                     </td>
                 </tr>
             `;
         }).join('');
     }
 
-    getStatusClass(status) {
-        const statusMap = {
-            'Not Started': 'status-not-started',
-            'In Progress': 'status-in-progress',
-            'Completed': 'status-completed',
-            'On Hold': 'status-on-hold'
-        };
-        return statusMap[status] || 'status-not-started';
+    persist() {
+        localStorage.setItem('fountainProjects', JSON.stringify(this.projects));
     }
 
-    updateCount() {
-        const count = this.projects.length;
-        document.getElementById('projectCount').textContent = 
-            `${count} project${count !== 1 ? 's' : ''}`;
+    load() {
+        const saved = localStorage.getItem('fountainProjects');
+        return saved ? JSON.parse(saved) : this.defaults();
     }
 
-    saveProjects() {
-        localStorage.setItem('fountainVitalityProjects', JSON.stringify(this.projects));
+    defaults() {
+        return [{
+            id: '1',
+            name: 'Docusign Template Generator',
+            status: 'In Progress',
+            owner: '',
+            dueDate: '',
+            url: 'https://docusign-git-main-daniel-8982s-projects.vercel.app?_vercel_share=aaQplppDthTyFoYeIQm75hkbCvNasDYo'
+        }];
     }
 
-    loadProjects() {
-        const saved = localStorage.getItem('fountainVitalityProjects');
-        return saved ? JSON.parse(saved) : this.getInitialProjects();
-    }
-
-    getInitialProjects() {
-        return [
-            {
-                id: '1',
-                name: 'Docusign Template Generator',
-                status: 'In Progress',
-                owner: '',
-                dueDate: '',
-                url: 'https://docusign-git-main-daniel-8982s-projects.vercel.app?_vercel_share=aaQplppDthTyFoYeIQm75hkbCvNasDYo',
-                createdAt: new Date().toISOString()
-            }
-        ];
-    }
-
-    escapeHtml(text) {
-        if (!text) return '';
+    esc(str) {
+        if (!str) return '';
         const div = document.createElement('div');
-        div.textContent = text;
+        div.textContent = str;
         return div.innerHTML;
     }
 }
 
-// Initialize the database
-let projectDB;
+let db;
 document.addEventListener('DOMContentLoaded', () => {
-    projectDB = new ProjectDatabase();
+    db = new NotionDB();
 });

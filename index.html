@@ -3,91 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fountain Vitality - Projects</title>
+    <title>Fountain Vitality Projects</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="title-section">
-                <h1>🌊 Fountain Vitality Projects</h1>
-                <span class="project-count" id="projectCount">0 projects</span>
+    <div class="page">
+        <div class="page-header">
+            <h1 class="page-title">🌊 Fountain Vitality Projects</h1>
+        </div>
+        
+        <div class="database-wrapper">
+            <div class="database-header">
+                <button class="new-button" id="newBtn">
+                    <span>+</span> New
+                </button>
             </div>
-            <button class="btn-new" id="addProjectBtn">+ New</button>
-        </header>
-
-        <!-- Database Table -->
-        <div class="database-container">
-            <table class="database-table" id="projectsTable">
-                <thead>
-                    <tr>
-                        <th class="col-name">Name</th>
-                        <th class="col-status">Status</th>
-                        <th class="col-owner">Owner</th>
-                        <th class="col-date">Due Date</th>
-                        <th class="col-url">URL</th>
-                        <th class="col-actions">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="projectsBody">
-                    <!-- Projects will be inserted here -->
-                </tbody>
-            </table>
             
-            <div id="emptyState" class="empty-state hidden">
-                <p>No projects yet</p>
+            <div class="database-view">
+                <table class="notion-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Owner</th>
+                            <th>Due Date</th>
+                            <th>URL</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Rows will be inserted here -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- Modal for Adding/Editing Projects -->
-    <div id="projectModal" class="modal hidden">
-        <div class="modal-content">
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-card">
             <div class="modal-header">
-                <h2 id="modalTitle">New Project</h2>
-                <button class="close-btn" id="closeModal">&times;</button>
+                <h3 id="modalTitle">New Project</h3>
+                <button class="modal-close" id="closeBtn">&times;</button>
             </div>
-            <form id="projectForm">
-                <div class="form-field">
-                    <label for="projectName">Project Name *</label>
-                    <input type="text" id="projectName" required placeholder="Enter project name">
-                </div>
-                
-                <div class="form-field">
-                    <label for="projectStatus">Status</label>
-                    <select id="projectStatus">
-                        <option value="Not Started">Not Started</option>
-                        <option value="In Progress" selected>In Progress</option>
-                        <option value="Completed">Completed</option>
-                        <option value="On Hold">On Hold</option>
-                    </select>
-                </div>
-                
-                <div class="form-field">
-                    <label for="projectOwner">Owner</label>
-                    <input type="text" id="projectOwner" placeholder="Enter owner name">
-                </div>
-                
-                <div class="form-field">
-                    <label for="projectDueDate">Due Date</label>
-                    <input type="date" id="projectDueDate">
-                </div>
-                
-                <div class="form-field">
-                    <label for="projectUrl">URL</label>
-                    <input type="url" id="projectUrl" placeholder="https://...">
-                </div>
-                
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
-                    <button type="submit" class="btn-submit">Save</button>
-                </div>
-            </form>
+            <div class="modal-body">
+                <form id="projectForm">
+                    <div class="field">
+                        <label>Name</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="field">
+                        <label>Status</label>
+                        <select id="status">
+                            <option>Not Started</option>
+                            <option selected>In Progress</option>
+                            <option>Completed</option>
+                            <option>On Hold</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Owner</label>
+                        <input type="text" id="owner">
+                    </div>
+                    <div class="field">
+                        <label>Due Date</label>
+                        <input type="date" id="dueDate">
+                    </div>
+                    <div class="field">
+                        <label>URL</label>
+                        <input type="url" id="url" placeholder="https://">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
+                        <button type="submit" class="btn-save">Save</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <script src="script.js"></script>
 </body>
 </html>
-
