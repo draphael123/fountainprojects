@@ -166,6 +166,14 @@ class NotionDB {
                 owner: '',
                 dueDate: '',
                 url: 'https://vercel.com/daniel-8982s-projects/time-clock-extension'
+            },
+            {
+                id: '6',
+                name: 'Fountain Onboarding',
+                status: 'In Progress',
+                owner: '',
+                dueDate: '',
+                url: 'https://fountain-onboarding.vercel.app/'
             }
         ];
     }
