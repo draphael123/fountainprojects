@@ -9,7 +9,14 @@
 <body>
     <div class="page">
         <div class="page-header">
-            <h1 class="page-title">🌊 Fountain Vitality Projects</h1>
+            <div class="header-top">
+                <h1 class="page-title">🌊 Fountain Vitality Projects</h1>
+                <button class="settings-btn" id="settingsBtn" title="Settings">⚙️</button>
+            </div>
+            <p class="page-description">
+                A central hub for tracking all active development projects at Fountain Vitality. 
+                This database provides a quick overview of our internal tools, platforms, and ongoing initiatives.
+            </p>
         </div>
         
         <div class="database-wrapper">
@@ -79,6 +86,79 @@
                         <button type="submit" class="btn-save">Save</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button class="modal-close" id="closeSettings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h4>Appearance</h4>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>🌙</span>
+                            <div>
+                                <strong>Dark Mode</strong>
+                                <p>Switch to dark theme for comfortable viewing</p>
+                            </div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h4>Data Management</h4>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>💾</span>
+                            <div>
+                                <strong>Export Projects</strong>
+                                <p>Download all projects as JSON backup</p>
+                            </div>
+                        </div>
+                        <button class="setting-btn" id="exportBtn">Export</button>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>📥</span>
+                            <div>
+                                <strong>Import Projects</strong>
+                                <p>Restore projects from JSON file</p>
+                            </div>
+                        </div>
+                        <button class="setting-btn" id="importBtn">Import</button>
+                        <input type="file" id="importFile" accept=".json" style="display:none">
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>🗑️</span>
+                            <div>
+                                <strong>Clear All Data</strong>
+                                <p>Reset database to defaults</p>
+                            </div>
+                        </div>
+                        <button class="setting-btn danger" id="clearBtn">Clear</button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h4>About</h4>
+                    <div class="about-info">
+                        <p><strong>Version:</strong> 1.0</p>
+                        <p><strong>Purpose:</strong> Project tracking database for Fountain Vitality internal tools and platforms</p>
+                        <p><strong>Storage:</strong> Data saved locally in browser</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -12,6 +12,7 @@ class NotionDB {
     }
 
     bind() {
+        // Project modal
         document.getElementById('newBtn').onclick = () => this.openModal();
         document.getElementById('closeBtn').onclick = () => this.closeModal();
         document.getElementById('cancelBtn').onclick = () => this.closeModal();
@@ -19,7 +20,25 @@ class NotionDB {
             e.preventDefault();
             this.save();
         };
-        document.querySelector('.modal-overlay').onclick = () => this.closeModal();
+        document.querySelectorAll('.modal-overlay')[0].onclick = () => this.closeModal();
+
+        // Settings modal
+        document.getElementById('settingsBtn').onclick = () => this.openSettings();
+        document.getElementById('closeSettings').onclick = () => this.closeSettings();
+        document.querySelectorAll('.modal-overlay')[1].onclick = () => this.closeSettings();
+
+        // Dark mode
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        darkModeToggle.checked = isDarkMode;
+        if (isDarkMode) document.body.classList.add('dark-mode');
+        darkModeToggle.onchange = () => this.toggleDarkMode();
+
+        // Data management
+        document.getElementById('exportBtn').onclick = () => this.exportData();
+        document.getElementById('importBtn').onclick = () => document.getElementById('importFile').click();
+        document.getElementById('importFile').onchange = (e) => this.importData(e);
+        document.getElementById('clearBtn').onclick = () => this.clearData();
     }
 
     openModal(id = null) {
@@ -47,6 +66,74 @@ class NotionDB {
     closeModal() {
         document.getElementById('modal').classList.remove('active');
         this.editing = null;
+    }
+
+    openSettings() {
+        document.getElementById('settingsModal').classList.add('active');
+    }
+
+    closeSettings() {
+        document.getElementById('settingsModal').classList.remove('active');
+    }
+
+    toggleDarkMode() {
+        const isDark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', isDark);
+    }
+
+    exportData() {
+        const data = {
+            version: this.version,
+            projects: this.projects,
+            exportedAt: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `fountain-projects-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    importData(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                const projects = data.projects || data;
+                
+                if (Array.isArray(projects)) {
+                    if (confirm(`Import ${projects.length} projects? This will replace your current data.`)) {
+                        this.projects = projects;
+                        this.persist();
+                        this.render();
+                        alert('Projects imported successfully!');
+                        this.closeSettings();
+                    }
+                } else {
+                    alert('Invalid file format');
+                }
+            } catch (err) {
+                alert('Error reading file: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    }
+
+    clearData() {
+        if (confirm('Are you sure you want to clear all data and reset to defaults? This cannot be undone.')) {
+            localStorage.removeItem('fountainProjects');
+            this.projects = this.defaults();
+            this.persist();
+            this.render();
+            alert('Data cleared and reset to defaults');
+            this.closeSettings();
+        }
     }
 
     save() {
