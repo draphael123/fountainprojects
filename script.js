@@ -1,5 +1,6 @@
 class NotionDB {
     constructor() {
+        this.version = '1.0';
         this.projects = this.load();
         this.editing = null;
         this.init();
@@ -53,14 +54,16 @@ class NotionDB {
             id: this.editing || Date.now().toString(),
             name: document.getElementById('name').value,
             status: document.getElementById('status').value,
-            owner: document.getElementById('owner').value,
-            dueDate: document.getElementById('dueDate').value,
-            url: document.getElementById('url').value
+            owner: document.getElementById('owner').value || '',
+            dueDate: document.getElementById('dueDate').value || '',
+            url: document.getElementById('url').value || ''
         };
 
         if (this.editing) {
             const i = this.projects.findIndex(x => x.id === this.editing);
-            this.projects[i] = data;
+            if (i !== -1) {
+                this.projects[i] = data;
+            }
         } else {
             this.projects.push(data);
         }
@@ -117,12 +120,35 @@ class NotionDB {
     }
 
     persist() {
-        localStorage.setItem('fountainProjects', JSON.stringify(this.projects));
+        const data = {
+            version: this.version,
+            projects: this.projects,
+            lastSaved: new Date().toISOString()
+        };
+        localStorage.setItem('fountainProjects', JSON.stringify(data));
     }
 
     load() {
         const saved = localStorage.getItem('fountainProjects');
-        return saved ? JSON.parse(saved) : this.defaults();
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                // Handle old format (array) or new format (object with version)
+                if (Array.isArray(data)) {
+                    // Migrate old format
+                    return data;
+                } else if (data.projects) {
+                    return data.projects;
+                }
+            } catch (e) {
+                console.error('Error loading projects:', e);
+            }
+        }
+        // Load defaults and save them to localStorage
+        const defaults = this.defaults();
+        this.projects = defaults;
+        this.persist();
+        return defaults;
     }
 
     defaults() {
