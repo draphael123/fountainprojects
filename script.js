@@ -8,6 +8,7 @@ class NotionDB {
 
     init() {
         this.render();
+        this.updateStats();
         this.bind();
     }
 
@@ -50,6 +51,7 @@ class NotionDB {
             const p = this.projects.find(x => x.id === id);
             title.textContent = 'Edit Project';
             document.getElementById('name').value = p.name;
+            document.getElementById('description').value = p.description || '';
             document.getElementById('status').value = p.status;
             document.getElementById('owner').value = p.owner;
             document.getElementById('dueDate').value = p.dueDate;
@@ -140,6 +142,7 @@ class NotionDB {
         const data = {
             id: this.editing || Date.now().toString(),
             name: document.getElementById('name').value,
+            description: document.getElementById('description').value || '',
             status: document.getElementById('status').value,
             owner: document.getElementById('owner').value || '',
             dueDate: document.getElementById('dueDate').value || '',
@@ -176,7 +179,7 @@ class NotionDB {
         const tbody = document.getElementById('tableBody');
         
         if (this.projects.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#37352f99;">No projects yet</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-secondary);">No projects yet</td></tr>';
             return;
         }
 
@@ -191,6 +194,7 @@ class NotionDB {
             return `
                 <tr>
                     <td><span class="project-name">${this.esc(p.name)}</span></td>
+                    <td style="color:var(--text-secondary);font-size:13px;">${this.esc(p.description) || ''}</td>
                     <td><span class="status status-${statusClass}">${p.status}</span></td>
                     <td>${this.esc(p.owner) || ''}</td>
                     <td>${date}</td>
@@ -204,6 +208,21 @@ class NotionDB {
                 </tr>
             `;
         }).join('');
+
+        this.updateStats();
+    }
+
+    updateStats() {
+        const total = this.projects.length;
+        const completed = this.projects.filter(p => p.status === 'Completed').length;
+        const active = this.projects.filter(p => 
+            p.status === 'In Progress' || p.status === 'Not Started'
+        ).length;
+
+        document.getElementById('totalCount').textContent = total;
+        document.getElementById('activeCount').textContent = active;
+        document.getElementById('completedCount').textContent = completed;
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
     }
 
     persist() {
@@ -243,6 +262,7 @@ class NotionDB {
             {
                 id: '1',
                 name: 'Docusign Template Generator',
+                description: 'Automated tool for creating and managing DocuSign templates with custom fields',
                 status: 'In Progress',
                 owner: '',
                 dueDate: '',
@@ -251,6 +271,7 @@ class NotionDB {
             {
                 id: '2',
                 name: 'Macro bot',
+                description: 'Text expansion Chrome extension for faster typing and productivity',
                 status: 'In Progress',
                 owner: '',
                 dueDate: '',
@@ -259,6 +280,7 @@ class NotionDB {
             {
                 id: '3',
                 name: 'Availability Report',
+                description: 'Automated scraper for OnceHub availability tracking and reporting',
                 status: 'In Progress',
                 owner: '',
                 dueDate: '',
@@ -267,6 +289,7 @@ class NotionDB {
             {
                 id: '4',
                 name: 'CS Escalation Service (DOES NOT WORK!)',
+                description: 'Customer support escalation automation system - currently experiencing technical issues',
                 status: 'On Hold',
                 owner: '',
                 dueDate: '',
@@ -275,6 +298,7 @@ class NotionDB {
             {
                 id: '5',
                 name: 'Time clock',
+                description: 'Chrome extension for time tracking and attendance management',
                 status: 'In Progress',
                 owner: '',
                 dueDate: '',
@@ -283,6 +307,7 @@ class NotionDB {
             {
                 id: '6',
                 name: 'Fountain Onboarding',
+                description: 'Comprehensive onboarding portal for new employees with resources and documentation',
                 status: 'In Progress',
                 owner: '',
                 dueDate: '',

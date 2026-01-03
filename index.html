@@ -14,9 +14,23 @@
                 <button class="settings-btn" id="settingsBtn" title="Settings">⚙️</button>
             </div>
             <p class="page-description">
-                A central hub for tracking all active development projects at Fountain Vitality. 
-                This database provides a quick overview of our internal tools, platforms, and ongoing initiatives.
+                A central hub for tracking all active tech development projects at Fountain Vitality. 
+                This database provides a quick overview of our internal tools, platforms, and ongoing initiatives by Daniel Raphael.
             </p>
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="totalCount">6</span>
+                    <span class="stat-label">Total Projects</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="activeCount">5</span>
+                    <span class="stat-label">Active</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="completedCount">0</span>
+                    <span class="stat-label">Completed</span>
+                </div>
+            </div>
         </div>
         
         <div class="database-wrapper">
@@ -31,6 +45,7 @@
                     <thead>
                         <tr>
                             <th>Name</th>
+                            <th>Description</th>
                             <th>Status</th>
                             <th>Owner</th>
                             <th>Due Date</th>
@@ -61,6 +76,10 @@
                         <input type="text" id="name" required>
                     </div>
                     <div class="field">
+                        <label>Description</label>
+                        <textarea id="description" rows="2" placeholder="Brief description of the project"></textarea>
+                    </div>
+                    <div class="field">
                         <label>Status</label>
                         <select id="status">
                             <option>Not Started</option>
@@ -88,6 +107,25 @@
                 </form>
             </div>
         </div>
+
+        <div class="info-section">
+            <div class="info-card">
+                <h3>📚 Tech Stack</h3>
+                <p>These projects utilize modern web technologies including React, Node.js, Python, Chrome Extensions, and various APIs to deliver robust solutions for Fountain Vitality's operations.</p>
+            </div>
+            <div class="info-card">
+                <h3>🎯 Project Goals</h3>
+                <p>Each project aims to streamline workflows, improve efficiency, and enhance the customer experience through automation, better tooling, and innovative solutions.</p>
+            </div>
+            <div class="info-card">
+                <h3>💡 Need Something New?</h3>
+                <p>Have an idea for a new tool or improvement? Click the "+ New" button to add it to the tracking list, or reach out to discuss development priorities.</p>
+            </div>
+        </div>
+
+        <footer class="page-footer">
+            <p>Built and maintained by <strong>Daniel Raphael</strong> • Fountain Vitality Internal Tools • <span id="currentYear">2025</span></p>
+        </footer>
     </div>
 
     <!-- Settings Modal -->
