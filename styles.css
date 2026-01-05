@@ -196,25 +196,29 @@ body.dark-mode {
 }
 
 .page-title {
-    font-size: 40px;
-    font-weight: 700;
+    font-size: 42px;
+    font-weight: 800;
     line-height: 1.2;
     background: linear-gradient(135deg, 
-        #a78bfa 0%, 
-        #8b5cf6 15%, 
-        #7c3aed 30%, 
-        #6366f1 45%, 
-        #4f46e5 60%, 
-        #4338ca 75%, 
-        #3730a3 90%, 
-        #a78bfa 100%);
-    background-size: 300% 300%;
+        #f43f5e 0%, 
+        #ec4899 12%, 
+        #a855f7 24%, 
+        #8b5cf6 36%, 
+        #6366f1 48%, 
+        #3b82f6 60%, 
+        #06b6d4 72%, 
+        #10b981 84%, 
+        #fbbf24 96%, 
+        #f43f5e 100%);
+    background-size: 400% 400%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     display: inline-block;
-    animation: titleGradient 8s ease infinite;
+    animation: titleGradient 6s ease infinite;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    margin: 0;
+    flex: 1;
 }
 
 @keyframes titleGradient {
