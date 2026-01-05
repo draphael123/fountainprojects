@@ -35,28 +35,72 @@
         
         <div class="database-wrapper">
             <div class="database-header">
-                <button class="new-button" id="newBtn">
-                    <span>+</span> New
-                </button>
+                <div class="header-controls">
+                    <div class="search-container">
+                        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search projects...">
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="In Progress">In Progress</button>
+                        <button class="filter-btn" data-filter="Completed">Completed</button>
+                        <button class="filter-btn" data-filter="On Hold">On Hold</button>
+                        <button class="filter-btn" data-filter="Not Started">Not Started</button>
+                        <button class="filter-btn" data-filter="archived">Archived</button>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="table" title="Table View">⊞</button>
+                        <button class="view-btn" data-view="cards" title="Cards View">⊡</button>
+                    </div>
+                    <button class="bulk-action-btn" id="bulkActionBtn" style="display:none;">
+                        <span id="bulkCount">0</span> selected
+                    </button>
+                    <button class="new-button" id="newBtn">
+                        <span>+</span> New
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bulk-actions-bar" id="bulkActionsBar" style="display:none;">
+                <span id="bulkSelectedCount">0 projects selected</span>
+                <div class="bulk-buttons">
+                    <button class="bulk-btn" id="bulkArchive">Archive</button>
+                    <button class="bulk-btn" id="bulkDelete">Delete</button>
+                    <button class="bulk-btn" id="bulkStatusChange">Change Status</button>
+                    <button class="bulk-btn" id="bulkDeselect">Cancel</button>
+                </div>
             </div>
             
             <div class="database-view">
-                <table class="notion-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                            <th>Owner</th>
-                            <th>Due Date</th>
-                            <th>URL</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <!-- Rows will be inserted here -->
-                    </tbody>
-                </table>
+                <div id="tableView" class="view-container">
+                    <table class="notion-table">
+                        <thead>
+                            <tr>
+                                <th class="checkbox-col"><input type="checkbox" id="selectAll"></th>
+                                <th class="sortable" data-sort="name">Name <span class="sort-icon">⇅</span></th>
+                                <th class="sortable" data-sort="description">Description</th>
+                                <th class="sortable" data-sort="status">Status <span class="sort-icon">⇅</span></th>
+                                <th class="sortable" data-sort="priority">Priority</th>
+                                <th class="sortable" data-sort="progress">Progress</th>
+                                <th>Tags</th>
+                                <th class="sortable" data-sort="owner">Owner</th>
+                                <th class="sortable" data-sort="dueDate">Due Date <span class="sort-icon">⇅</span></th>
+                                <th>URL</th>
+                                <th class="sortable" data-sort="modified">Modified</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="cardsView" class="view-container cards-container" style="display:none;">
+                    <div id="cardsBody" class="cards-grid">
+                        <!-- Cards will be inserted here -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -72,33 +116,55 @@
             <div class="modal-body">
                 <form id="projectForm">
                     <div class="field">
-                        <label>Name</label>
+                        <label>Name <span class="required">*</span></label>
                         <input type="text" id="name" required>
+                        <span class="field-error" id="nameError"></span>
                     </div>
                     <div class="field">
                         <label>Description</label>
                         <textarea id="description" rows="2" placeholder="Brief description of the project"></textarea>
                     </div>
-                    <div class="field">
-                        <label>Status</label>
-                        <select id="status">
-                            <option>Not Started</option>
-                            <option selected>In Progress</option>
-                            <option>Completed</option>
-                            <option>On Hold</option>
-                        </select>
+                    <div class="field-row">
+                        <div class="field">
+                            <label>Status</label>
+                            <select id="status">
+                                <option>Not Started</option>
+                                <option selected>In Progress</option>
+                                <option>Completed</option>
+                                <option>On Hold</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Priority</label>
+                            <select id="priority">
+                                <option>Low</option>
+                                <option selected>Medium</option>
+                                <option>High</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="field">
-                        <label>Owner</label>
-                        <input type="text" id="owner">
+                        <label>Progress <span id="progressValue">0%</span></label>
+                        <input type="range" id="progress" min="0" max="100" value="0">
                     </div>
                     <div class="field">
-                        <label>Due Date</label>
-                        <input type="date" id="dueDate">
+                        <label>Tags (comma-separated)</label>
+                        <input type="text" id="tags" placeholder="e.g., frontend, backend, api">
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label>Owner</label>
+                            <input type="text" id="owner">
+                        </div>
+                        <div class="field">
+                            <label>Due Date</label>
+                            <input type="date" id="dueDate">
+                        </div>
                     </div>
                     <div class="field">
                         <label>URL</label>
                         <input type="url" id="url" placeholder="https://">
+                        <span class="field-error" id="urlError"></span>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
@@ -120,6 +186,47 @@
             <div class="info-card">
                 <h3>💡 Need Something New?</h3>
                 <p>Have an idea for a new tool or improvement? Click the "+ New" button to add it to the tracking list, or reach out to discuss development priorities.</p>
+            </div>
+        </div>
+
+        <div class="purpose-section">
+            <div class="purpose-content">
+                <h2 class="purpose-title">🎯 Why This Website Exists</h2>
+                <div class="purpose-grid">
+                    <div class="purpose-card">
+                        <div class="purpose-icon">🚀</div>
+                        <h3>Centralized Project Management</h3>
+                        <p>This platform serves as the single source of truth for all tech development projects at Fountain Vitality. It eliminates confusion, reduces duplicate work, and ensures everyone knows what's being built and why.</p>
+                    </div>
+                    <div class="purpose-card">
+                        <div class="purpose-icon">⚡</div>
+                        <h3>Improved Efficiency</h3>
+                        <p>By tracking project status, priorities, and progress in one place, we can make better decisions about resource allocation, identify bottlenecks early, and ensure critical projects get the attention they deserve.</p>
+                    </div>
+                    <div class="purpose-card">
+                        <div class="purpose-icon">👥</div>
+                        <h3>Team Transparency</h3>
+                        <p>Everyone at Fountain Vitality can see what projects are in progress, who's working on them, and when they're expected to be completed. This transparency builds trust and enables better collaboration.</p>
+                    </div>
+                    <div class="purpose-card">
+                        <div class="purpose-icon">📊</div>
+                        <h3>Data-Driven Decisions</h3>
+                        <p>With comprehensive project tracking, we can analyze trends, measure success rates, identify patterns, and continuously improve our development processes based on real data.</p>
+                    </div>
+                    <div class="purpose-card">
+                        <div class="purpose-icon">🎨</div>
+                        <h3>Innovation Hub</h3>
+                        <p>This platform encourages innovation by making it easy to propose new projects, track ideas from conception to completion, and celebrate achievements that drive Fountain Vitality forward.</p>
+                    </div>
+                    <div class="purpose-card">
+                        <div class="purpose-icon">💡</div>
+                        <h3>Knowledge Preservation</h3>
+                        <p>Every project, its purpose, and its outcomes are documented here. This creates an invaluable knowledge base that helps us learn from past projects and avoid repeating mistakes.</p>
+                    </div>
+                </div>
+                <div class="purpose-footer">
+                    <p>Built with ❤️ by <strong>Daniel Raphael</strong> to empower Fountain Vitality's development team and streamline our path to innovation.</p>
+                </div>
             </div>
         </div>
 
@@ -160,11 +267,21 @@
                         <div class="setting-label">
                             <span>💾</span>
                             <div>
-                                <strong>Export Projects</strong>
+                                <strong>Export Projects (JSON)</strong>
                                 <p>Download all projects as JSON backup</p>
                             </div>
                         </div>
-                        <button class="setting-btn" id="exportBtn">Export</button>
+                        <button class="setting-btn" id="exportBtn">Export JSON</button>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>📊</span>
+                            <div>
+                                <strong>Export Projects (CSV)</strong>
+                                <p>Download all projects as CSV spreadsheet</p>
+                            </div>
+                        </div>
+                        <button class="setting-btn" id="exportCsvBtn">Export CSV</button>
                     </div>
                     <div class="setting-item">
                         <div class="setting-label">
@@ -199,6 +316,72 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Confirmation Dialog -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-card confirm-dialog">
+            <div class="modal-header">
+                <h3 id="confirmTitle">Confirm Action</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" id="confirmCancel">Cancel</button>
+                <button type="button" class="btn-save" id="confirmOk">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick View Modal -->
+    <div class="modal" id="quickViewModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-card quick-view-card">
+            <div class="modal-header">
+                <h3 id="quickViewTitle">Project Details</h3>
+                <button class="modal-close" id="closeQuickView">&times;</button>
+            </div>
+            <div class="modal-body" id="quickViewBody">
+                <!-- Content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Change Modal for Bulk Actions -->
+    <div class="modal" id="bulkStatusModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Change Status</h3>
+                <button class="modal-close" id="closeBulkStatus">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="field">
+                    <label>New Status</label>
+                    <select id="bulkStatusSelect">
+                        <option>Not Started</option>
+                        <option>In Progress</option>
+                        <option>Completed</option>
+                        <option>On Hold</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" id="cancelBulkStatus">Cancel</button>
+                    <button type="button" class="btn-save" id="saveBulkStatus">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display:none;">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
     </div>
 
     <script src="script.js"></script>
