@@ -9,6 +9,9 @@ class NotionDB {
         this.searchQuery = '';
         this.selectedProjects = new Set();
         this.activityLog = this.loadActivityLog();
+        this.recentProjects = this.loadRecentProjects();
+        this.formDraft = this.loadFormDraft();
+        this.projectHistory = this.loadProjectHistory();
         this.init();
     }
 
@@ -31,12 +34,93 @@ class NotionDB {
             }
         };
 
-        // Form validation
-        document.getElementById('name').oninput = () => this.validateField('name');
-        document.getElementById('url').oninput = () => this.validateField('url');
+        // Form validation and auto-save
+        document.getElementById('name').oninput = () => {
+            this.validateField('name');
+            this.autoSaveDraft();
+        };
+        document.getElementById('url').oninput = () => {
+            this.validateField('url');
+            this.autoSaveDraft();
+        };
+        document.getElementById('description').oninput = () => this.autoSaveDraft();
+        document.getElementById('status').onchange = () => this.autoSaveDraft();
+        document.getElementById('priority').onchange = () => this.autoSaveDraft();
         document.getElementById('progress').oninput = (e) => {
             document.getElementById('progressValue').textContent = e.target.value + '%';
+            this.autoSaveDraft();
         };
+        document.getElementById('tags').oninput = () => this.autoSaveDraft();
+        document.getElementById('owner').oninput = () => this.autoSaveDraft();
+        document.getElementById('dueDate').onchange = () => this.autoSaveDraft();
+        document.getElementById('url').oninput = () => {
+            this.validateField('url');
+            this.autoSaveDraft();
+        };
+        document.getElementById('dependencies').onchange = () => this.autoSaveDraft();
+
+        // Template dropdown
+        document.getElementById('templateBtn').onclick = (e) => {
+            e.stopPropagation();
+            const menu = document.getElementById('templateMenu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        };
+        document.querySelectorAll('.template-option').forEach(btn => {
+            btn.onclick = () => {
+                this.useTemplate(btn.dataset.template);
+                document.getElementById('templateMenu').style.display = 'none';
+            };
+        });
+        document.onclick = () => {
+            document.getElementById('templateMenu').style.display = 'none';
+        };
+
+        // Context menu
+        this.setupContextMenu();
+
+        // Bulk edit
+        const bulkStatusChangeBtn = document.getElementById('bulkStatusChange');
+        if (bulkStatusChangeBtn) {
+            bulkStatusChangeBtn.onclick = () => {
+                if (this.selectedProjects.size > 0) {
+                    document.getElementById('bulkEditModal').classList.add('active');
+                    document.getElementById('bulkEditCount').textContent = this.selectedProjects.size;
+                }
+            };
+        }
+        document.getElementById('closeBulkEdit').onclick = () => {
+            document.getElementById('bulkEditModal').classList.remove('active');
+        };
+        document.getElementById('cancelBulkEdit').onclick = () => {
+            document.getElementById('bulkEditModal').classList.remove('active');
+        };
+        document.getElementById('bulkEditForm').onsubmit = (e) => {
+            e.preventDefault();
+            this.bulkEdit();
+        };
+
+        // Project history
+        document.getElementById('viewHistoryBtn').onclick = () => {
+            if (this.editing) {
+                this.viewProjectHistory(this.editing);
+            }
+        };
+        document.getElementById('closeHistory').onclick = () => {
+            document.getElementById('historyModal').classList.remove('active');
+        };
+
+        // Suggestions modal
+        document.getElementById('suggestionsBtn').onclick = () => this.openSuggestions();
+        document.getElementById('closeSuggestions').onclick = () => this.closeSuggestions();
+        document.getElementById('cancelSuggestions').onclick = () => this.closeSuggestions();
+        document.getElementById('suggestionForm').onsubmit = (e) => {
+            e.preventDefault();
+            this.submitSuggestion();
+        };
+
+        // Help modal
+        document.getElementById('helpBtn').onclick = () => this.openHelp();
+        document.getElementById('closeHelp').onclick = () => this.closeHelp();
 
         // Settings modal
         document.getElementById('settingsBtn').onclick = () => this.openSettings();
@@ -63,6 +147,10 @@ class NotionDB {
         document.getElementById('importBtn').onclick = () => document.getElementById('importFile').click();
         document.getElementById('importFile').onchange = (e) => this.importData(e);
         document.getElementById('clearBtn').onclick = () => this.clearData();
+        document.getElementById('viewSuggestionsBtn').onclick = () => this.viewSuggestions();
+        document.getElementById('closeViewSuggestions').onclick = () => {
+            document.getElementById('viewSuggestionsModal').classList.remove('active');
+        };
 
         // Search
         const searchInput = document.getElementById('searchInput');
@@ -127,9 +215,7 @@ class NotionDB {
         // Bulk actions
         document.getElementById('bulkArchive').onclick = () => this.bulkArchive();
         document.getElementById('bulkDelete').onclick = () => this.bulkDelete();
-        document.getElementById('bulkStatusChange').onclick = () => {
-            document.getElementById('bulkStatusModal').classList.add('active');
-        };
+        // bulkStatusChange is handled above in the bulk edit section
         document.getElementById('bulkDeselect').onclick = () => this.deselectAll();
         document.getElementById('saveBulkStatus').onclick = () => this.bulkChangeStatus();
         document.getElementById('closeBulkStatus').onclick = () => {
@@ -305,6 +391,9 @@ class NotionDB {
         const modal = document.getElementById('modal');
         const title = document.getElementById('modalTitle');
         
+        // Populate dependencies dropdown
+        this.populateDependencies(id);
+        
         if (id) {
             this.editing = id;
             const p = this.projects.find(x => x.id === id);
@@ -319,11 +408,26 @@ class NotionDB {
             document.getElementById('owner').value = p.owner || '';
             document.getElementById('dueDate').value = p.dueDate || '';
             document.getElementById('url').value = p.url || '';
+            
+            // Set dependencies after populating dropdown
+            setTimeout(() => {
+                const deps = document.getElementById('dependencies');
+                if (deps && p.dependencies) {
+                    Array.from(deps.options).forEach(opt => {
+                        opt.selected = (p.dependencies || []).includes(opt.value);
+                    });
+                }
+            }, 100);
+            
+            document.getElementById('viewHistoryBtn').style.display = 'inline-block';
+            this.loadDraft(); // Load auto-saved draft if exists
         } else {
             this.editing = null;
             title.textContent = 'New Project';
             document.getElementById('projectForm').reset();
             document.getElementById('progressValue').textContent = '0%';
+            document.getElementById('viewHistoryBtn').style.display = 'none';
+            this.loadDraft(); // Load auto-saved draft
         }
         
         modal.classList.add('active');
@@ -335,12 +439,112 @@ class NotionDB {
         document.getElementById('projectForm').reset();
     }
 
+    openSuggestions() {
+        document.getElementById('suggestionsModal').classList.add('active');
+        document.getElementById('suggestionForm').reset();
+    }
+
+    closeSuggestions() {
+        document.getElementById('suggestionsModal').classList.remove('active');
+        document.getElementById('suggestionForm').reset();
+    }
+
+    submitSuggestion() {
+        const suggestion = {
+            id: Date.now().toString(),
+            type: document.getElementById('suggestionType').value,
+            title: document.getElementById('suggestionTitle').value.trim(),
+            description: document.getElementById('suggestionDescription').value.trim(),
+            name: document.getElementById('suggestionName').value.trim() || 'Anonymous',
+            timestamp: new Date().toISOString(),
+            status: 'pending'
+        };
+
+        // Save to localStorage
+        let suggestions = this.loadSuggestions();
+        suggestions.push(suggestion);
+        this.saveSuggestions(suggestions);
+
+        this.showToast('Thank you! Your suggestion has been submitted.', 'success');
+        this.closeSuggestions();
+        
+        // Log activity
+        this.logActivity(null, 'suggestion_submitted', `Suggestion: "${suggestion.title}"`);
+    }
+
+    loadSuggestions() {
+        const saved = localStorage.getItem('fountainSuggestions');
+        return saved ? JSON.parse(saved) : [];
+    }
+
+    saveSuggestions(suggestions) {
+        localStorage.setItem('fountainSuggestions', JSON.stringify(suggestions));
+    }
+
+    openHelp() {
+        document.getElementById('helpModal').classList.add('active');
+    }
+
+    closeHelp() {
+        document.getElementById('helpModal').classList.remove('active');
+    }
+
     openSettings() {
         document.getElementById('settingsModal').classList.add('active');
     }
 
     closeSettings() {
         document.getElementById('settingsModal').classList.remove('active');
+    }
+
+    viewSuggestions() {
+        const suggestions = this.loadSuggestions();
+        const listContainer = document.getElementById('suggestionsList');
+        
+        if (suggestions.length === 0) {
+            listContainer.innerHTML = `
+                <div class="empty-suggestions">
+                    <div class="empty-icon">💡</div>
+                    <h3>No suggestions yet</h3>
+                    <p>Be the first to submit a suggestion!</p>
+                </div>
+            `;
+        } else {
+            listContainer.innerHTML = suggestions.map(s => {
+                const date = new Date(s.timestamp).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                const typeLabels = {
+                    'feature': '✨ New Feature',
+                    'improvement': '🔧 Improvement',
+                    'bug': '🐛 Bug Report',
+                    'ui': '🎨 UI/UX',
+                    'other': '💭 Other'
+                };
+                
+                return `
+                    <div class="suggestion-item">
+                        <div class="suggestion-header">
+                            <span class="suggestion-type">${typeLabels[s.type] || '💭 Other'}</span>
+                            <span class="suggestion-date">${date}</span>
+                        </div>
+                        <h4 class="suggestion-item-title">${this.esc(s.title)}</h4>
+                        <p class="suggestion-item-description">${this.esc(s.description)}</p>
+                        <div class="suggestion-footer">
+                            <span class="suggestion-author">Submitted by: ${this.esc(s.name)}</span>
+                            <span class="suggestion-status">Status: ${s.status}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        document.getElementById('viewSuggestionsModal').classList.add('active');
+        this.closeSettings();
     }
 
     toggleDarkMode() {
@@ -443,6 +647,8 @@ class NotionDB {
     }
 
     save() {
+        const oldProject = this.editing ? this.projects.find(p => p.id === this.editing) : null;
+        
         const data = {
             id: this.editing || Date.now().toString(),
             name: document.getElementById('name').value.trim(),
@@ -454,22 +660,46 @@ class NotionDB {
             owner: document.getElementById('owner').value.trim() || '',
             dueDate: document.getElementById('dueDate').value || '',
             url: document.getElementById('url').value.trim() || '',
+            dependencies: Array.from(document.getElementById('dependencies').selectedOptions).map(o => o.value).filter(Boolean),
             modified: new Date().toISOString(),
-            created: this.editing ? this.projects.find(p => p.id === this.editing)?.created || new Date().toISOString() : new Date().toISOString()
+            created: this.editing ? (oldProject?.created || new Date().toISOString()) : new Date().toISOString()
         };
 
         const isNew = !this.editing;
         if (this.editing) {
             const i = this.projects.findIndex(x => x.id === this.editing);
             if (i !== -1) {
+                // Track changes for history
+                if (oldProject.status !== data.status) {
+                    this.addToHistory(this.editing, 'status_changed', oldProject.status, data.status);
+                }
+                if (oldProject.priority !== data.priority) {
+                    this.addToHistory(this.editing, 'priority_changed', oldProject.priority, data.priority);
+                }
+                if (oldProject.progress !== data.progress) {
+                    this.addToHistory(this.editing, 'progress_updated', oldProject.progress, data.progress);
+                }
+                if (JSON.stringify(oldProject.tags || []) !== JSON.stringify(data.tags)) {
+                    this.addToHistory(this.editing, 'tag_added', null, data.tags.join(', '));
+                }
+                if (JSON.stringify(oldProject.dependencies || []) !== JSON.stringify(data.dependencies)) {
+                    this.addToHistory(this.editing, 'dependency_added', null, data.dependencies.length + ' dependencies');
+                }
+                
                 this.projects[i] = data;
                 this.logActivity(this.editing, 'updated', `Project "${data.name}" updated`);
+                this.addToRecent(this.editing);
             }
         } else {
             this.projects.push(data);
             this.logActivity(data.id, 'created', `Project "${data.name}" created`);
+            this.addToHistory(data.id, 'created', null, null);
+            this.addToRecent(data.id);
         }
 
+        // Clear draft
+        localStorage.removeItem('fountainFormDraft');
+        
         this.persist();
         this.render();
         this.closeModal();
@@ -496,6 +726,8 @@ class NotionDB {
     quickView(id) {
         const project = this.projects.find(p => p.id === id);
         if (!project) return;
+        
+        this.addToRecent(id);
 
         const statusClass = project.status?.toLowerCase().replace(/\s+/g, '-') || '';
         const date = project.dueDate ? new Date(project.dueDate).toLocaleDateString('en-US', { 
@@ -557,6 +789,17 @@ class NotionDB {
                 <div class="quick-view-field">
                     <label>URL</label>
                     <p><a href="${this.esc(project.url)}" target="_blank">${this.esc(project.url)}</a></p>
+                </div>
+                ` : ''}
+                ${project.dependencies && project.dependencies.length > 0 ? `
+                <div class="quick-view-field">
+                    <label>Related Projects</label>
+                    <div class="dependencies-list">
+                        ${project.dependencies.map(depId => {
+                            const dep = this.projects.find(p => p.id === depId);
+                            return dep ? `<span class="dependency-tag" onclick="db.quickView('${depId}'); event.stopPropagation();">${this.esc(dep.name)}</span>` : '';
+                        }).filter(Boolean).join('')}
+                    </div>
                 </div>
                 ` : ''}
                 <div class="quick-view-field">
@@ -741,6 +984,33 @@ class NotionDB {
 
         this.updateStats();
         this.updateSortIcons();
+        this.renderRecentProjects();
+    }
+
+    renderRecentProjects() {
+        if (this.recentProjects.length === 0) {
+            document.getElementById('recentProjectsSection').style.display = 'none';
+            return;
+        }
+        
+        const recent = this.recentProjects.map(id => this.projects.find(p => p.id === id)).filter(Boolean);
+        if (recent.length === 0) {
+            document.getElementById('recentProjectsSection').style.display = 'none';
+            return;
+        }
+        
+        document.getElementById('recentProjectsSection').style.display = 'block';
+        const list = document.getElementById('recentProjectsList');
+        list.innerHTML = recent.map(p => {
+            const statusClass = p.status?.toLowerCase().replace(/\s+/g, '-') || '';
+            return `
+                <div class="recent-project-item" onclick="db.quickView('${p.id}')">
+                    <span class="status status-${statusClass}">${p.status || 'Not Started'}</span>
+                    <span class="recent-project-name">${this.esc(p.name)}</span>
+                    <span class="recent-project-progress">${p.progress || 0}%</span>
+                </div>
+            `;
+        }).join('');
     }
 
     renderTableView(projects) {
@@ -807,6 +1077,7 @@ class NotionDB {
                     <td onclick="event.stopPropagation();">
                         <div class="action-btns">
                             <button class="action-btn" onclick="db.edit('${p.id}')">Edit</button>
+                            <button class="action-btn" onclick="db.duplicateProject('${p.id}')" title="Duplicate project">Copy</button>
                             <button class="action-btn delete-btn" onclick="db.delete('${p.id}')">Delete</button>
                         </div>
                     </td>
@@ -874,6 +1145,7 @@ class NotionDB {
                         </div>
                         <div class="card-actions" onclick="event.stopPropagation();">
                             <button class="action-btn" onclick="db.edit('${p.id}')">Edit</button>
+                            <button class="action-btn" onclick="db.duplicateProject('${p.id}')" title="Duplicate">Copy</button>
                             <button class="action-btn delete-btn" onclick="db.delete('${p.id}')">Delete</button>
                         </div>
                     </div>
@@ -945,7 +1217,7 @@ class NotionDB {
                 description: 'Automated tool for creating and managing DocuSign templates with custom fields',
                 status: 'In Progress',
                 priority: 'High',
-                progress: 75,
+                progress: 90,
                 tags: ['automation', 'docusign'],
                 owner: '',
                 dueDate: '',
@@ -999,9 +1271,9 @@ class NotionDB {
                 id: '5',
                 name: 'Time clock',
                 description: 'Chrome extension for time tracking and attendance management',
-                status: 'In Progress',
+                status: 'Completed',
                 priority: 'High',
-                progress: 50,
+                progress: 100,
                 tags: ['chrome-extension', 'time-tracking'],
                 owner: '',
                 dueDate: '',
@@ -1015,7 +1287,7 @@ class NotionDB {
                 description: 'Comprehensive onboarding portal for new employees with resources and documentation',
                 status: 'In Progress',
                 priority: 'High',
-                progress: 85,
+                progress: 90,
                 tags: ['onboarding', 'portal'],
                 owner: '',
                 dueDate: '',
@@ -1043,7 +1315,7 @@ class NotionDB {
                 description: 'Tool for creating and managing detailed itemized receipts with line items and calculations',
                 status: 'In Progress',
                 priority: 'Medium',
-                progress: 65,
+                progress: 50,
                 tags: ['receipts', 'builder', 'finance'],
                 owner: '',
                 dueDate: '',
@@ -1085,7 +1357,7 @@ class NotionDB {
                 description: 'Automated tool for extracting and scraping data from documents and files',
                 status: 'In Progress',
                 priority: 'Medium',
-                progress: 70,
+                progress: 20,
                 tags: ['scraping', 'documents', 'extraction'],
                 owner: '',
                 dueDate: '',

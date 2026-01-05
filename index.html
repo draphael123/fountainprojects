@@ -11,12 +11,24 @@
         <div class="page-header">
             <div class="header-top">
                 <h1 class="page-title">🌊 Fountain Vitality Projects</h1>
-                <button class="settings-btn" id="settingsBtn" title="Settings">⚙️</button>
+                <div class="header-buttons">
+                    <button class="header-icon-btn" id="suggestionsBtn" title="Submit Suggestions">💡</button>
+                    <button class="header-icon-btn" id="helpBtn" title="Help & Keyboard Shortcuts">❓</button>
+                    <button class="settings-btn" id="settingsBtn" title="Settings">⚙️</button>
+                </div>
             </div>
-            <p class="page-description">
-                A central hub for tracking all active tech development projects at Fountain Vitality. 
-                This database provides a quick overview of our internal tools, platforms, and ongoing initiatives by Daniel Raphael.
-            </p>
+            <div class="purpose-intro">
+                <p class="page-description">
+                    <strong>Purpose:</strong> This platform serves as the central command center for all tech development projects at Fountain Vitality. 
+                    It provides real-time visibility into project status, progress, and priorities, enabling better decision-making, 
+                    resource allocation, and team collaboration. Whether you're tracking a new feature, monitoring an automation tool, 
+                    or planning the next innovation, this dashboard keeps everyone aligned and informed.
+                </p>
+                <p class="page-description-secondary">
+                    Built to eliminate project silos, reduce duplicate work, and ensure critical initiatives get the attention they deserve. 
+                    Every project here represents our commitment to improving operations, enhancing customer experience, and driving innovation forward.
+                </p>
+            </div>
             <div class="quick-stats">
                 <div class="stat-item">
                     <span class="stat-value" id="totalCount">6</span>
@@ -31,6 +43,13 @@
                     <span class="stat-label">Completed</span>
                 </div>
             </div>
+            
+            <div class="recent-projects-section" id="recentProjectsSection" style="display:none;">
+                <h3 class="section-title">🕒 Recently Viewed</h3>
+                <div class="recent-projects-list" id="recentProjectsList">
+                    <!-- Recent projects will be inserted here -->
+                </div>
+            </div>
         </div>
         
         <div class="database-wrapper">
@@ -40,25 +59,38 @@
                         <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search projects...">
                     </div>
                     <div class="filter-buttons">
-                        <button class="filter-btn active" data-filter="all">All</button>
-                        <button class="filter-btn" data-filter="In Progress">In Progress</button>
-                        <button class="filter-btn" data-filter="Completed">Completed</button>
-                        <button class="filter-btn" data-filter="On Hold">On Hold</button>
-                        <button class="filter-btn" data-filter="Not Started">Not Started</button>
-                        <button class="filter-btn" data-filter="archived">Archived</button>
+                        <button class="filter-btn active" data-filter="all" title="Show all active projects">All</button>
+                        <button class="filter-btn" data-filter="In Progress" title="Projects currently being worked on">In Progress</button>
+                        <button class="filter-btn" data-filter="Completed" title="Finished projects">Completed</button>
+                        <button class="filter-btn" data-filter="On Hold" title="Projects temporarily paused">On Hold</button>
+                        <button class="filter-btn" data-filter="Not Started" title="Projects not yet begun">Not Started</button>
+                        <button class="filter-btn" data-filter="archived" title="Archived projects">Archived</button>
                     </div>
                 </div>
                 <div class="header-actions">
-                    <div class="view-toggle">
-                        <button class="view-btn active" data-view="table" title="Table View">⊞</button>
-                        <button class="view-btn" data-view="cards" title="Cards View">⊡</button>
+                    <div class="view-toggle" title="Switch between table and card views">
+                        <button class="view-btn active" data-view="table" title="Table View - Best for detailed information">⊞</button>
+                        <button class="view-btn" data-view="cards" title="Cards View - Best for visual browsing">⊡</button>
                     </div>
                     <button class="bulk-action-btn" id="bulkActionBtn" style="display:none;">
                         <span id="bulkCount">0</span> selected
                     </button>
-                    <button class="new-button" id="newBtn">
-                        <span>+</span> New
-                    </button>
+                    <div class="new-button-group">
+                        <button class="new-button" id="newBtn" title="Create a new project (Ctrl/Cmd + N)">
+                            <span>+</span> New
+                        </button>
+                        <div class="template-dropdown">
+                            <button class="template-btn" id="templateBtn" title="Use a project template">▼</button>
+                            <div class="template-menu" id="templateMenu" style="display:none;">
+                                <button class="template-option" data-template="web-app">🌐 Web Application</button>
+                                <button class="template-option" data-template="chrome-extension">🔌 Chrome Extension</button>
+                                <button class="template-option" data-template="automation">⚙️ Automation Tool</button>
+                                <button class="template-option" data-template="api">🔗 API/Backend</button>
+                                <button class="template-option" data-template="calculator">🧮 Calculator/Utility</button>
+                                <button class="template-option" data-template="portal">🚪 Portal/Dashboard</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -145,11 +177,13 @@
                     </div>
                     <div class="field">
                         <label>Progress <span id="progressValue">0%</span></label>
-                        <input type="range" id="progress" min="0" max="100" value="0">
+                        <input type="range" id="progress" min="0" max="100" value="0" title="Drag to set project completion percentage">
+                        <small class="field-hint">Use the slider to track how complete your project is</small>
                     </div>
                     <div class="field">
                         <label>Tags (comma-separated)</label>
-                        <input type="text" id="tags" placeholder="e.g., frontend, backend, api">
+                        <input type="text" id="tags" placeholder="e.g., frontend, backend, api" title="Separate multiple tags with commas">
+                        <small class="field-hint">Add tags to categorize and easily find projects later</small>
                     </div>
                     <div class="field-row">
                         <div class="field">
@@ -166,8 +200,16 @@
                         <input type="url" id="url" placeholder="https://">
                         <span class="field-error" id="urlError"></span>
                     </div>
+                    <div class="field">
+                        <label>Related Projects (Dependencies)</label>
+                        <select id="dependencies" multiple style="min-height: 80px;">
+                            <option value="">Select related projects...</option>
+                        </select>
+                        <small class="field-hint">Hold Ctrl/Cmd to select multiple related projects</small>
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn-cancel" id="cancelBtn">Cancel</button>
+                        <button type="button" class="btn-secondary" id="viewHistoryBtn" style="display:none;">View History</button>
                         <button type="submit" class="btn-save">Save</button>
                     </div>
                 </form>
@@ -233,6 +275,102 @@
         <footer class="page-footer">
             <p>Built and maintained by <strong>Daniel Raphael</strong> • Fountain Vitality Internal Tools • <span id="currentYear">2025</span></p>
         </footer>
+    </div>
+
+    <!-- Suggestions Modal -->
+    <div class="modal" id="suggestionsModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>💡 Submit a Suggestion</h3>
+                <button class="modal-close" id="closeSuggestions">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="suggestion-intro">Have an idea to improve this platform? We'd love to hear it! Your feedback helps us make this tool better for everyone.</p>
+                <form id="suggestionForm">
+                    <div class="field">
+                        <label>Suggestion Type</label>
+                        <select id="suggestionType" required>
+                            <option value="">Select a type...</option>
+                            <option value="feature">New Feature</option>
+                            <option value="improvement">Improvement</option>
+                            <option value="bug">Bug Report</option>
+                            <option value="ui">UI/UX Enhancement</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Title <span class="required">*</span></label>
+                        <input type="text" id="suggestionTitle" placeholder="Brief title for your suggestion" required>
+                    </div>
+                    <div class="field">
+                        <label>Description <span class="required">*</span></label>
+                        <textarea id="suggestionDescription" rows="5" placeholder="Describe your suggestion in detail. What problem does it solve? How would it work?" required></textarea>
+                    </div>
+                    <div class="field">
+                        <label>Your Name (Optional)</label>
+                        <input type="text" id="suggestionName" placeholder="Leave blank to submit anonymously">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" id="cancelSuggestions">Cancel</button>
+                        <button type="submit" class="btn-save">Submit Suggestion</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal" id="helpModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-card help-modal">
+            <div class="modal-header">
+                <h3>❓ Help & Keyboard Shortcuts</h3>
+                <button class="modal-close" id="closeHelp">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="help-section">
+                    <h4>⌨️ Keyboard Shortcuts</h4>
+                    <div class="shortcut-list">
+                        <div class="shortcut-item">
+                            <kbd>Ctrl/Cmd</kbd> + <kbd>N</kbd>
+                            <span>Create new project</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl/Cmd</kbd> + <kbd>F</kbd>
+                            <span>Focus search bar</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Esc</kbd>
+                            <span>Close any open modal</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="help-section">
+                    <h4>📖 How to Use</h4>
+                    <ul class="help-list">
+                        <li><strong>Search:</strong> Type in the search bar to find projects by name, description, owner, or tags</li>
+                        <li><strong>Filter:</strong> Click status buttons to filter projects by their current status</li>
+                        <li><strong>Sort:</strong> Click column headers in table view to sort projects</li>
+                        <li><strong>View Toggle:</strong> Switch between table and card views using the view buttons</li>
+                        <li><strong>Quick View:</strong> Click any project row/card to see details without editing</li>
+                        <li><strong>Bulk Actions:</strong> Select multiple projects using checkboxes for bulk operations</li>
+                        <li><strong>Progress Tracking:</strong> Update progress percentage to track completion</li>
+                        <li><strong>Tags:</strong> Add comma-separated tags to categorize and find projects easily</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h4>💡 Tips</h4>
+                    <ul class="help-list">
+                        <li>Use tags to group related projects (e.g., "automation", "frontend", "api")</li>
+                        <li>Set due dates to track deadlines and see overdue projects highlighted</li>
+                        <li>Export your data regularly as a backup</li>
+                        <li>Archive completed projects to keep your active list clean</li>
+                        <li>Use priority levels to focus on high-impact projects first</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Settings Modal -->
@@ -307,9 +445,23 @@
                 </div>
 
                 <div class="settings-section">
+                    <h4>Suggestions</h4>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>💡</span>
+                            <div>
+                                <strong>View Submitted Suggestions</strong>
+                                <p>See all suggestions that have been submitted</p>
+                            </div>
+                        </div>
+                        <button class="setting-btn" id="viewSuggestionsBtn">View</button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
                     <h4>About</h4>
                     <div class="about-info">
-                        <p><strong>Version:</strong> 1.0</p>
+                        <p><strong>Version:</strong> 2.0</p>
                         <p><strong>Purpose:</strong> Project tracking database for Fountain Vitality internal tools and platforms</p>
                         <p><strong>Storage:</strong> Data saved locally in browser</p>
                     </div>
@@ -373,6 +525,97 @@
                 <div class="modal-footer">
                     <button type="button" class="btn-cancel" id="cancelBulkStatus">Cancel</button>
                     <button type="button" class="btn-save" id="saveBulkStatus">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu" style="display:none;">
+        <button class="context-item" id="contextQuickView">👁️ Quick View</button>
+        <button class="context-item" id="contextEdit">✏️ Edit</button>
+        <button class="context-item" id="contextDuplicate">📋 Duplicate</button>
+        <button class="context-item" id="contextViewHistory">📜 View History</button>
+        <button class="context-item" id="contextArchive">📦 Archive</button>
+        <hr class="context-divider">
+        <button class="context-item context-danger" id="contextDelete">🗑️ Delete</button>
+    </div>
+
+    <!-- Bulk Edit Modal -->
+    <div class="modal" id="bulkEditModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Bulk Edit Projects</h3>
+                <button class="modal-close" id="closeBulkEdit">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="suggestion-intro">Edit <span id="bulkEditCount">0</span> selected project(s)</p>
+                <form id="bulkEditForm">
+                    <div class="field">
+                        <label>Status</label>
+                        <select id="bulkEditStatus">
+                            <option value="">Keep current</option>
+                            <option value="Not Started">Not Started</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="On Hold">On Hold</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Priority</label>
+                        <select id="bulkEditPriority">
+                            <option value="">Keep current</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Owner</label>
+                        <input type="text" id="bulkEditOwner" placeholder="Leave blank to keep current">
+                    </div>
+                    <div class="field">
+                        <label>Add Tags (comma-separated)</label>
+                        <input type="text" id="bulkEditTags" placeholder="e.g., urgent, q1-2025">
+                        <small class="field-hint">Tags will be added to existing tags</small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" id="cancelBulkEdit">Cancel</button>
+                        <button type="submit" class="btn-save">Apply Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project History Modal -->
+    <div class="modal" id="historyModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-card history-modal">
+            <div class="modal-header">
+                <h3 id="historyTitle">Project History</h3>
+                <button class="modal-close" id="closeHistory">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="historyList" class="history-list">
+                    <!-- History items will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Suggestions Modal -->
+    <div class="modal" id="viewSuggestionsModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-card suggestions-view-modal">
+            <div class="modal-header">
+                <h3>💡 Submitted Suggestions</h3>
+                <button class="modal-close" id="closeViewSuggestions">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="suggestionsList" class="suggestions-list">
+                    <!-- Suggestions will be inserted here -->
                 </div>
             </div>
         </div>
