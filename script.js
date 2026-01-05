@@ -439,46 +439,46 @@ class NotionDB {
         document.getElementById('projectForm').reset();
     }
 
-    openSuggestions() {
-        document.getElementById('suggestionsModal').classList.add('active');
-        document.getElementById('suggestionForm').reset();
+    openRequests() {
+        document.getElementById('requestsModal').classList.add('active');
+        document.getElementById('requestForm').reset();
     }
 
-    closeSuggestions() {
-        document.getElementById('suggestionsModal').classList.remove('active');
-        document.getElementById('suggestionForm').reset();
+    closeRequests() {
+        document.getElementById('requestsModal').classList.remove('active');
+        document.getElementById('requestForm').reset();
     }
 
-    submitSuggestion() {
-        const suggestion = {
+    submitRequest() {
+        const request = {
             id: Date.now().toString(),
-            type: document.getElementById('suggestionType').value,
-            title: document.getElementById('suggestionTitle').value.trim(),
-            description: document.getElementById('suggestionDescription').value.trim(),
-            name: document.getElementById('suggestionName').value.trim() || 'Anonymous',
+            type: document.getElementById('requestType').value,
+            title: document.getElementById('requestTitle').value.trim(),
+            description: document.getElementById('requestDescription').value.trim(),
+            name: document.getElementById('requestName').value.trim() || 'Anonymous',
             timestamp: new Date().toISOString(),
             status: 'pending'
         };
 
         // Save to localStorage
-        let suggestions = this.loadSuggestions();
-        suggestions.push(suggestion);
-        this.saveSuggestions(suggestions);
+        let requests = this.loadRequests();
+        requests.push(request);
+        this.saveRequests(requests);
 
-        this.showToast('Thank you! Your suggestion has been submitted.', 'success');
-        this.closeSuggestions();
+        this.showToast('Thank you! Your request has been submitted.', 'success');
+        this.closeRequests();
         
         // Log activity
-        this.logActivity(null, 'suggestion_submitted', `Suggestion: "${suggestion.title}"`);
+        this.logActivity(null, 'request_submitted', `Request: "${request.title}"`);
     }
 
-    loadSuggestions() {
-        const saved = localStorage.getItem('fountainSuggestions');
+    loadRequests() {
+        const saved = localStorage.getItem('fountainRequests');
         return saved ? JSON.parse(saved) : [];
     }
 
-    saveSuggestions(suggestions) {
-        localStorage.setItem('fountainSuggestions', JSON.stringify(suggestions));
+    saveRequests(requests) {
+        localStorage.setItem('fountainRequests', JSON.stringify(requests));
     }
 
     openHelp() {
