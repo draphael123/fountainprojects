@@ -198,16 +198,38 @@ body.dark-mode {
 .stat-item {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 16px 20px;
+    gap: 8px;
+    padding: 20px 24px;
     background: linear-gradient(135deg, rgba(30, 30, 40, 0.95) 0%, rgba(25, 25, 35, 0.85) 100%);
-    border-radius: 16px;
+    border-radius: 20px;
     border: 3px solid;
     backdrop-filter: blur(15px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+}
+
+.stat-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #f43f5e 0%, #ec4899 20%, #a855f7 40%, #8b5cf6 60%, #6366f1 80%, #3b82f6 100%);
+    background-size: 300% 100%;
+    animation: statProgressGlow 3s ease infinite;
+    opacity: 0.8;
+}
+
+@keyframes statProgressGlow {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
 }
 
 .stat-item::before {
