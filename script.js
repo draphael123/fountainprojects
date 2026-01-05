@@ -1061,8 +1061,8 @@ class NotionDB {
                     </td>
                     <td><span class="project-name">${this.esc(p.name)}</span></td>
                     <td style="color:var(--text-secondary);font-size:13px;max-width:200px;overflow:hidden;text-overflow:ellipsis;">${this.esc(p.description) || ''}</td>
-                    <td><span class="status status-${statusClass}">${p.status || 'Not Started'}</span></td>
-                    <td><span class="priority priority-${priorityClass}">${p.priority || 'Medium'}</span></td>
+                    <td><span class="status status-${statusClass}">${this.getStatusIcon(p.status)} ${p.status || 'Not Started'}</span></td>
+                    <td><span class="priority priority-${priorityClass}">${this.getPriorityIcon(p.priority)} ${p.priority || 'Medium'}</span></td>
                     <td>
                         <div class="progress-cell">
                             <div class="progress-bar-small" style="width: ${p.progress || 0}%"></div>
@@ -1373,6 +1373,29 @@ class NotionDB {
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
+    }
+
+    getStatusIcon(status) {
+        const icons = {
+            'In Progress': '🚀',
+            'Completed': '✅',
+            'On Hold': '⏸️',
+            'Not Started': '📋',
+            'Planning': '📝',
+            'Review': '👀',
+            'Archived': '📦'
+        };
+        return icons[status] || '📌';
+    }
+
+    getPriorityIcon(priority) {
+        const icons = {
+            'High': '🔴',
+            'Medium': '🟡',
+            'Low': '🟢',
+            'Critical': '⚡'
+        };
+        return icons[priority] || '⚪';
     }
 }
 
