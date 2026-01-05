@@ -118,6 +118,15 @@ class NotionDB {
             this.submitRequest();
         };
 
+        // Quick request form (on main page)
+        document.getElementById('quickRequestForm').onsubmit = (e) => {
+            e.preventDefault();
+            this.submitQuickRequest();
+        };
+        document.getElementById('clearQuickRequest').onclick = () => {
+            document.getElementById('quickRequestForm').reset();
+        };
+
         // Help modal
         document.getElementById('helpBtn').onclick = () => this.openHelp();
         document.getElementById('closeHelp').onclick = () => this.closeHelp();
