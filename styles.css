@@ -30,14 +30,20 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     background: linear-gradient(135deg, 
-        #667eea 0%, 
-        #764ba2 15%, 
-        #f093fb 30%, 
-        #4facfe 45%, 
-        #00f2fe 60%, 
-        #43e97b 75%, 
-        #fa709a 90%, 
-        #fee140 100%);
+        #ff006e 0%, 
+        #fb5607 8%, 
+        #ffbe0b 16%, 
+        #8338ec 24%, 
+        #3a86ff 32%, 
+        #06ffa5 40%, 
+        #ff006e 48%, 
+        #fb5607 56%, 
+        #ffbe0b 64%, 
+        #8338ec 72%, 
+        #3a86ff 80%, 
+        #06ffa5 88%, 
+        #ff006e 96%, 
+        #fb5607 100%);
     background-size: 400% 400%;
     background-attachment: fixed;
     animation: gradientShift 20s ease infinite;

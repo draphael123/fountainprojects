@@ -1165,6 +1165,39 @@ class NotionDB {
         document.getElementById('activeCount').textContent = active;
         document.getElementById('completedCount').textContent = completed;
         document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Update progress bars in stat cards
+        this.updateStatProgressBars(total, active, completed);
+    }
+
+    updateStatProgressBars(total, active, completed) {
+        // Calculate percentages
+        const activePercent = total > 0 ? (active / total) * 100 : 0;
+        const completedPercent = total > 0 ? (completed / total) * 100 : 0;
+        
+        // Update or create progress bars in stat items
+        const statItems = document.querySelectorAll('.stat-item');
+        statItems.forEach((item, index) => {
+            let progressBar = item.querySelector('.stat-progress-bar');
+            if (!progressBar) {
+                progressBar = document.createElement('div');
+                progressBar.className = 'stat-progress-bar';
+                progressBar.innerHTML = '<div class="stat-progress-fill"></div>';
+                item.appendChild(progressBar);
+            }
+            
+            const fill = progressBar.querySelector('.stat-progress-fill');
+            if (index === 0) {
+                // Total projects - show 100% (all projects)
+                fill.style.width = '100%';
+            } else if (index === 1) {
+                // Active projects
+                fill.style.width = activePercent + '%';
+            } else if (index === 2) {
+                // Completed projects
+                fill.style.width = completedPercent + '%';
+            }
+        });
     }
 
     persist() {
