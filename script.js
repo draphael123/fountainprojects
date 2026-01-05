@@ -1127,8 +1127,8 @@ class NotionDB {
                     </div>
                     <p class="card-description">${this.esc(p.description) || 'No description'}</p>
                     <div class="card-meta">
-                        <span class="status status-${statusClass}">${p.status || 'Not Started'}</span>
-                        <span class="priority priority-${priorityClass}">${p.priority || 'Medium'}</span>
+                        <span class="status status-${statusClass}">${this.getStatusIcon(p.status)} ${p.status || 'Not Started'}</span>
+                        <span class="priority priority-${priorityClass}">${this.getPriorityIcon(p.priority)} ${p.priority || 'Medium'}</span>
                     </div>
                     <div class="card-progress">
                         <label>Progress</label>
