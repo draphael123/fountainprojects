@@ -481,6 +481,32 @@ class NotionDB {
         this.logActivity(null, 'request_submitted', `Request: "${request.title}"`);
     }
 
+    submitQuickRequest() {
+        const request = {
+            id: Date.now().toString(),
+            type: document.getElementById('quickRequestType').value,
+            title: document.getElementById('quickRequestTitle').value.trim(),
+            description: document.getElementById('quickRequestDescription').value.trim(),
+            name: document.getElementById('quickRequestName').value.trim() || 'Anonymous',
+            timestamp: new Date().toISOString(),
+            status: 'pending'
+        };
+
+        // Save to localStorage
+        let requests = this.loadRequests();
+        requests.push(request);
+        this.saveRequests(requests);
+
+        this.showToast('🎉 Thank you! Your request has been submitted successfully!', 'success');
+        document.getElementById('quickRequestForm').reset();
+        
+        // Log activity
+        this.logActivity(null, 'request_submitted', `Request: "${request.title}"`);
+        
+        // Scroll to top with smooth animation
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     loadRequests() {
         const saved = localStorage.getItem('fountainRequests');
         return saved ? JSON.parse(saved) : [];
