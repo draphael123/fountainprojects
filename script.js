@@ -1364,6 +1364,20 @@ class NotionDB {
                 url: 'https://doc-extraction-git-main-daniel-8982s-projects.vercel.app?_vercel_share=hqfJv0yDBleUR33ebQsoNWrc9gDOfMdE',
                 created: new Date().toISOString(),
                 modified: new Date().toISOString()
+            },
+            {
+                id: '12',
+                name: 'Fountain Projects',
+                description: 'Central project management dashboard for tracking all tech development projects at Fountain Vitality. Features include project templates, bulk actions, filtering, search, and comprehensive project tracking with status, priority, and progress monitoring.',
+                status: 'In Progress',
+                priority: 'High',
+                progress: 95,
+                tags: ['dashboard', 'project-management', 'portal', 'tracking'],
+                owner: '',
+                dueDate: '',
+                url: 'https://fountainprojects.vercel.app',
+                created: new Date().toISOString(),
+                modified: new Date().toISOString()
             }
         ];
     }
