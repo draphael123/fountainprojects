@@ -1962,8 +1962,8 @@ body.dark-mode .toast {
     gap: 16px;
 }
 
-/* Suggestions & Help Modals */
-.suggestion-intro {
+/* Requests & Help Modals */
+.request-intro {
     background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
     padding: 12px 16px;
     border-radius: 8px;

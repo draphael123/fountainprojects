@@ -109,13 +109,13 @@ class NotionDB {
             document.getElementById('historyModal').classList.remove('active');
         };
 
-        // Suggestions modal
-        document.getElementById('suggestionsBtn').onclick = () => this.openSuggestions();
-        document.getElementById('closeSuggestions').onclick = () => this.closeSuggestions();
-        document.getElementById('cancelSuggestions').onclick = () => this.closeSuggestions();
-        document.getElementById('suggestionForm').onsubmit = (e) => {
+        // Requests modal
+        document.getElementById('requestsBtn').onclick = () => this.openRequests();
+        document.getElementById('closeRequests').onclick = () => this.closeRequests();
+        document.getElementById('cancelRequests').onclick = () => this.closeRequests();
+        document.getElementById('requestForm').onsubmit = (e) => {
             e.preventDefault();
-            this.submitSuggestion();
+            this.submitRequest();
         };
 
         // Help modal
@@ -147,9 +147,9 @@ class NotionDB {
         document.getElementById('importBtn').onclick = () => document.getElementById('importFile').click();
         document.getElementById('importFile').onchange = (e) => this.importData(e);
         document.getElementById('clearBtn').onclick = () => this.clearData();
-        document.getElementById('viewSuggestionsBtn').onclick = () => this.viewSuggestions();
-        document.getElementById('closeViewSuggestions').onclick = () => {
-            document.getElementById('viewSuggestionsModal').classList.remove('active');
+        document.getElementById('viewRequestsBtn').onclick = () => this.viewRequests();
+        document.getElementById('closeViewRequests').onclick = () => {
+            document.getElementById('viewRequestsModal').classList.remove('active');
         };
 
         // Search
@@ -497,21 +497,21 @@ class NotionDB {
         document.getElementById('settingsModal').classList.remove('active');
     }
 
-    viewSuggestions() {
-        const suggestions = this.loadSuggestions();
-        const listContainer = document.getElementById('suggestionsList');
+    viewRequests() {
+        const requests = this.loadRequests();
+        const listContainer = document.getElementById('requestsList');
         
-        if (suggestions.length === 0) {
+        if (requests.length === 0) {
             listContainer.innerHTML = `
-                <div class="empty-suggestions">
+                <div class="empty-requests">
                     <div class="empty-icon">💡</div>
-                    <h3>No suggestions yet</h3>
-                    <p>Be the first to submit a suggestion!</p>
+                    <h3>No requests yet</h3>
+                    <p>Be the first to submit a request!</p>
                 </div>
             `;
         } else {
-            listContainer.innerHTML = suggestions.map(s => {
-                const date = new Date(s.timestamp).toLocaleDateString('en-US', { 
+            listContainer.innerHTML = requests.map(r => {
+                const date = new Date(r.timestamp).toLocaleDateString('en-US', { 
                     month: 'short', 
                     day: 'numeric', 
                     year: 'numeric',
@@ -527,23 +527,23 @@ class NotionDB {
                 };
                 
                 return `
-                    <div class="suggestion-item">
-                        <div class="suggestion-header">
-                            <span class="suggestion-type">${typeLabels[s.type] || '💭 Other'}</span>
-                            <span class="suggestion-date">${date}</span>
+                    <div class="request-item">
+                        <div class="request-header">
+                            <span class="request-type">${typeLabels[r.type] || '💭 Other'}</span>
+                            <span class="request-date">${date}</span>
                         </div>
-                        <h4 class="suggestion-item-title">${this.esc(s.title)}</h4>
-                        <p class="suggestion-item-description">${this.esc(s.description)}</p>
-                        <div class="suggestion-footer">
-                            <span class="suggestion-author">Submitted by: ${this.esc(s.name)}</span>
-                            <span class="suggestion-status">Status: ${s.status}</span>
+                        <h4 class="request-item-title">${this.esc(r.title)}</h4>
+                        <p class="request-item-description">${this.esc(r.description)}</p>
+                        <div class="request-footer">
+                            <span class="request-author">Submitted by: ${this.esc(r.name)}</span>
+                            <span class="request-status">Status: ${r.status}</span>
                         </div>
                     </div>
                 `;
             }).join('');
         }
         
-        document.getElementById('viewSuggestionsModal').classList.add('active');
+        document.getElementById('viewRequestsModal').classList.add('active');
         this.closeSettings();
     }
 
